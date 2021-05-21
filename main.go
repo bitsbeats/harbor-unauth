@@ -23,6 +23,10 @@ func main() {
 	}
 
 	// setup app
+	cidrCheck, err := middleware.NewCIDRCheck(cfg)
+	if err != nil {
+		log.Fatalf("unable to parse cidrs: %s", err)
+	}
 	authLoader := authloader.NewAuthLoader(cfg)
 	tokenProvider := token.NewTokenProvider(upstream, authLoader)
 	proxy := httputil.NewSingleHostReverseProxy(upstream)
@@ -34,6 +38,7 @@ func main() {
 	handler := middleware.Register(
 		mux,
 		middleware.Logger,
+		cidrCheck.Middleware(),
 		unauthMiddleware.Middleware(),
 	)
 
