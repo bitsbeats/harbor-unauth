@@ -5,13 +5,15 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/bitsbeats/harbor-unauth/core"
 )
 
 type (
 	CIDRCheck struct {
-		allowList []*net.IPNet
+		allowList  []*net.IPNet
+		proxyCount int
 	}
 )
 
@@ -25,14 +27,15 @@ func NewCIDRCheck(config *core.Config) (*CIDRCheck, error) {
 		allowList[i] = cidr
 	}
 	return &CIDRCheck{
-		allowList: allowList,
+		allowList:  allowList,
+		proxyCount: config.ProxyCount,
 	}, nil
 }
 
 func (c *CIDRCheck) Middleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			clientIP := getRequestRemoteIP(r)
+			clientIP := c.getRequestRemoteIP(r)
 
 			if !c.validateIP(clientIP) {
 				w.WriteHeader(401)
@@ -55,8 +58,23 @@ func (c *CIDRCheck) validateIP(ip net.IP) bool {
 	return false
 }
 
-func getRequestRemoteIP(r *http.Request) net.IP {
+func (c *CIDRCheck) getRequestRemoteIP(r *http.Request) net.IP {
 	remoteAddr, _, _ := net.SplitHostPort(r.RemoteAddr)
 	clientIP := net.ParseIP(remoteAddr)
+
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if c.proxyCount > 0 && forwarded != "" {
+		proxies := strings.Split(forwarded, ", ")
+
+		// check if we got through all supplied proxies
+		if len(proxies) < c.proxyCount+1 {
+			return clientIP
+		}
+
+		proxy := proxies[c.proxyCount]
+		clientIP = net.ParseIP(proxy)
+
+	}
+
 	return clientIP
 }

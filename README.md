@@ -9,6 +9,14 @@ Create a `/etc/harbor-unauth.json` like this:
 ```json
 {
   "url": "https://harbor.example.com/",
+
+  "proxy_count": 1,
+  "allowlist": [
+    "127.0.0.1/32",
+    "172.17.0.1/32",
+    "::1/128"
+  ],
+
   "auths": {
     "apps": {
       "user": "<robot user>",
