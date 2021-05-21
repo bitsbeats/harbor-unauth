@@ -67,7 +67,9 @@ func (c *CIDRCheck) getRequestRemoteIP(r *http.Request) net.IP {
 		proxies := strings.Split(forwarded, ", ")
 
 		// check if we got through all supplied proxies
-		if len(proxies) < c.proxyCount+1 {
+		proxyCount := len(proxies)
+		if proxyCount < c.proxyCount {
+			log.Printf("too few proxies (%d): %s", proxyCount, forwarded)
 			return clientIP
 		}
 
