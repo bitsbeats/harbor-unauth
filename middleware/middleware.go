@@ -8,7 +8,8 @@ import (
 
 func Register(mux http.Handler, middlewares ...func(http.Handler) http.Handler) (handler http.Handler) {
 	handler = mux
-	for _, middleware := range middlewares {
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		middleware := middlewares[i]
 		handler = middleware(handler)
 	}
 	return
