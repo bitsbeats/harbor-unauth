@@ -73,7 +73,7 @@ func (c *CIDRCheck) getRequestRemoteIP(r *http.Request) net.IP {
 			return clientIP
 		}
 
-		proxy := proxies[c.proxyCount]
+		proxy := proxies[c.proxyCount - 1]
 		clientIP = net.ParseIP(proxy)
 
 	}
