@@ -55,7 +55,6 @@ func NewUnauthMiddleware(upstream *url.URL, tokenProvider TokenProvider) *Unauth
 func (um *UnauthMiddleware) Middleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r.Host = um.upstream.Host
 			token, err := um.getToken(r)
 			if err != nil {
 				log.Printf("unable to inject auth into %q: %s", r.RequestURI, err)
