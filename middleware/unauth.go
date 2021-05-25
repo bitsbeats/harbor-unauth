@@ -69,9 +69,17 @@ func (um *UnauthMiddleware) Middleware() func(next http.Handler) http.Handler {
 }
 
 func (um *UnauthMiddleware) getToken(r *http.Request) (string, error) {
-	if r.RequestURI == "/v2/" || r.RequestURI == "/v2/catalog" {
+	switch r.RequestURI {
+	case "/v2":
+		fallthrough
+	case "/v2/":
+		fallthrough
+	case "/v2/_catalog":
+		fallthrough
+	case "/v2/_catalog/":
 		return um.tokenProvider.GetCatalogToken()
 	}
+
 	match := projectMatch.FindStringSubmatch(r.RequestURI)
 	if len(match) != 2 {
 		return "", fmt.Errorf("url does not match token injector")
