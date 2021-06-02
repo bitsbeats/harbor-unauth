@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -32,18 +33,28 @@ func NewCIDRCheck(config *core.Config) (*CIDRCheck, error) {
 	}, nil
 }
 
-func (c *CIDRCheck) Middleware() func(next http.Handler) http.Handler {
+func (c *CIDRCheck) InjectClientIPMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			clientIP := c.getRequestRemoteIP(r)
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, ClientIPContextKey, clientIP)
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
 
+func (c *CIDRCheck) Middleware() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			clientIP := ClientIPFromContext(r.Context())
 			if !c.validateIP(clientIP) {
 				w.WriteHeader(401)
 				_, _ = fmt.Fprint(w, "unauthorized\n")
 				log.Printf("unauthorized access from %v", clientIP)
 				return
 			}
-
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -73,7 +84,7 @@ func (c *CIDRCheck) getRequestRemoteIP(r *http.Request) net.IP {
 			return clientIP
 		}
 
-		proxy := proxies[c.proxyCount - 1]
+		proxy := proxies[c.proxyCount-1]
 		clientIP = net.ParseIP(proxy)
 
 	}

@@ -37,6 +37,7 @@ func main() {
 	mux.Handle("/", proxy)
 	handler := middleware.Register(
 		mux,
+		cidrCheck.InjectClientIPMiddleware(),
 		middleware.Logger,
 		cidrCheck.Middleware(),
 		unauthMiddleware.Middleware(),
