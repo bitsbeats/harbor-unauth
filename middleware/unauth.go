@@ -61,7 +61,6 @@ func (um *UnauthMiddleware) Middleware() func(next http.Handler) http.Handler {
 			} else {
 				bearer := fmt.Sprintf("Bearer %s", token)
 				r.Header.Add("Authorization", bearer)
-				log.Printf("token: %s", token)
 			}
 			next.ServeHTTP(w, r)
 		})

@@ -3,7 +3,6 @@ package token
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -73,7 +72,6 @@ func (t *TokenProvider) getToken(url, user, password string) (string, error) {
 		return "", fmt.Errorf("unable to create request: %w", err)
 	}
 	req.SetBasicAuth(user, password)
-	log.Printf("auth: %s:%s", user, password)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
