@@ -2,10 +2,11 @@ package core
 
 type (
 	Config struct {
-		URL        string          `json:"url"`
-		Auths      map[string]Auth `json:"auths"`
-		AllowList  []string        `json:"allowlist"`
-		ProxyCount int             `json:"proxy_count"`
+		URL        string   `json:"url"`
+		Auth       Auth     `json:"auth"`
+		Projects   []string `json:"projects"`
+		AllowList  []string `json:"allowlist"`
+		ProxyCount int      `json:"proxy_count"`
 	}
 
 	Auth struct {

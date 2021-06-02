@@ -6,25 +6,22 @@ import (
 
 type (
 	AuthLoader struct {
-		auths map[string]core.Auth
+		auth     core.Auth
+		projects []string
 	}
 )
 
 func NewAuthLoader(config *core.Config) *AuthLoader {
 	return &AuthLoader{
-		config.Auths,
+		config.Auth,
+		config.Projects,
 	}
 }
 
-func (a *AuthLoader) Lookup(project string) (core.Auth, bool) {
-	// if no project define return a random one
-	// required for /v2/_catalog
-	if project == "" {
-		for _, value := range a.auths {
-			return value, true
-		}
-	}
+func (a *AuthLoader) Lookup() (core.Auth, bool) {
+	return a.auth, true
+}
 
-	auth, ok := a.auths[project]
-	return auth, ok
+func (a *AuthLoader) Projects() []string {
+	return a.projects
 }

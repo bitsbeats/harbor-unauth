@@ -40,8 +40,8 @@ type (
 	}
 
 	TokenProvider interface {
-		GetPushPullToken(project string) (string, error)
 		GetCatalogToken() (string, error)
+		GetToken() (string, error)
 	}
 )
 
@@ -61,6 +61,7 @@ func (um *UnauthMiddleware) Middleware() func(next http.Handler) http.Handler {
 			} else {
 				bearer := fmt.Sprintf("Bearer %s", token)
 				r.Header.Add("Authorization", bearer)
+				log.Printf("token: %s", token)
 			}
 			next.ServeHTTP(w, r)
 		})
@@ -79,11 +80,6 @@ func (um *UnauthMiddleware) getToken(r *http.Request) (string, error) {
 		return um.tokenProvider.GetCatalogToken()
 	}
 
-	match := projectMatch.FindStringSubmatch(r.RequestURI)
-	if len(match) != 2 {
-		return "", fmt.Errorf("url does not match token injector")
-	}
-	project := match[1]
-	return um.tokenProvider.GetPushPullToken(project)
+	return um.tokenProvider.GetToken()
 
 }

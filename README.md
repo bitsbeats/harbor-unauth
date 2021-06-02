@@ -9,24 +9,19 @@ Create a `/etc/harbor-unauth.json` like this:
 ```json
 {
   "url": "https://127.0.0.1:8080/",
-
   "proxy_count": 1,
   "allowlist": [
     "127.0.0.1/32",
     "172.17.0.1/32",
     "::1/128"
   ],
-
-  "auths": {
-    "apps": {
-      "user": "<robot user>",
-      "password": "<robot token>"
-    },
-    "images": {
-      "user": "<robot user>",
-      "password": "<robot token>"
-    }
-  }
+  "auth": {
+    "user": "<robot user>",
+    "password": "<robot token>"
+  },
+  "projects": [
+    "<list of harbor projects...>"
+  ]
 }
 ```
 
